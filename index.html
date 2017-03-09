@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Memory Leak Demo</title>
+</head>
+
+<body>
+    <h1>Memory Leak Demo</h1>
+    <div style="margin: 5px">
+        Current Num: <span id="curNum" style="text-align: center;color:red">0</span>
+    </div>
+    <div>
+        <button id="add">add a heap data</button>
+        <button id="del">delete a heap data</button>
+    </div>
+    <script type="text/javascript">
+    window.onload = function() {
+        window.funArray = [];
+
+        // 事件绑定相关代码
+        var addEelement = document.getElementById('add');
+        var delEelement = document.getElementById('del');
+        addEelement.addEventListener('click', addNewHeapData, false);
+        delEelement.addEventListener('click', deleteHeapData, false);
+
+        /**
+         * 添加事件测试用
+         * @return {[type]} [description]
+         */
+        function hello() {
+            console.log('hello');
+        }
+
+        /**
+         * 模拟添加内存数据
+         */
+        function addNewHeapData() {
+            //  Create a class which will hold heap data. Makes it easier 
+            //  to find the data in Chrome.
+            function HeapData() {}
+
+            //  Create a heap data object.
+            var heapData = new HeapData();
+
+            //  Create a function that multiplies two numbers.
+            function multiply(a, b) {
+                return a * b;
+            }
+
+            //  Create a 'multiply by' function, which curries the above
+            //  to generate a function which multiplies by a constant. This
+            //  will involve closures. 
+            var multiplyBy = function(a) {
+                return function(b) {
+                    return multiply(a, b);
+                }
+            };
+
+            //  Add some data to our heap data object.
+            heapData.fry = "Philip J. Fry";
+            heapData.zoidberb = "John " + "Zoidberg";
+            heapData.character = {
+                firstName: "Amy",
+                secondName: "Wong"
+            };
+            heapData.double = multiplyBy(2);
+            heapData.multiplyBy100 = multiplyBy(100);
+            heapData.doubledNumber = heapData.double(18);
+            heapData.multipliedNumber = heapData.multiplyBy100(15);
+            heapData.div = document.createElement("div");
+
+            // 添加事件绑定
+            addEelement.addEventListener('click', function(){
+                console.log('add event listener');
+            }, false);
+
+            //  Put the heap data on the window, it is now pinned to a GC root.
+            // 挂载到 window 对象的属性是不能被 GC 回收
+            window.funArray.push(heapData);
+            setCurrentNum();
+            console.log('funArray.length: ' + window.funArray.length);
+        }
+
+        function deleteHeapData() {
+            addEelement.removeEventListener('click', function(){
+                console.log('delete event listener');
+            }, false);
+
+            window.funArray.shift();
+            setCurrentNum();
+            console.log('funArray.length: ' + window.funArray.length);
+        }
+
+        /**
+         * 设置界面显示添加数目
+         */
+        function setCurrentNum() {
+            var curNum = document.getElementById('curNum');
+            curNum.innerHTML = window.funArray.length;
+        }
+    }
+    </script>
+</body>
+
+</html>
